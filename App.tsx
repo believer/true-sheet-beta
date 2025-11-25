@@ -1,45 +1,79 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+	createStaticNavigation,
+	type StaticParamList,
+	useNavigation,
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as React from "react";
+import { Button, Text, useWindowDimensions, View } from "react-native";
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+function ModalScreen() {
+	return (
+		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+			<Text>Modal Screen</Text>
+			<TrueSheet detents={[0.6]} initialDetentIndex={0}>
+				<Text>Inside sheet</Text>
+			</TrueSheet>
+		</View>
+	);
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+function ModalScreenWithDetentUpdate() {
+	const [detents, setDetents] = React.useState([0.6]);
+	const { height } = useWindowDimensions();
 
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
+	return (
+		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+			<Text>Modal Screen</Text>
+			<TrueSheet detents={detents} initialDetentIndex={0}>
+				<View
+					onLayout={(event) => {
+						const viewHeight = event.nativeEvent.layout.height;
+
+						setDetents([(viewHeight + 40) / height]);
+					}}
+				>
+					<Text>Inside sheet</Text>
+				</View>
+			</TrueSheet>
+		</View>
+	);
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+function HomeScreen() {
+	const navigation = useNavigation();
+
+	return (
+		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+			<Text>Home Screen</Text>
+			<Button title="Modal" onPress={() => navigation.navigate("Modal")} />
+			<Button
+				title="Modal with detent update"
+				onPress={() => navigation.navigate("ModalWithDetents")}
+			/>
+		</View>
+	);
+}
+
+const RootStack = createNativeStackNavigator({
+	screens: {
+		Home: HomeScreen,
+		Modal: ModalScreen,
+		ModalWithDetents: ModalScreenWithDetentUpdate,
+	},
 });
 
-export default App;
+type RootStackParamList = StaticParamList<typeof RootStack>;
+
+declare global {
+	namespace ReactNavigation {
+		interface RootParamList extends RootStackParamList {}
+	}
+}
+
+const Navigation = createStaticNavigation(RootStack);
+
+export default function App() {
+	return <Navigation />;
+}
