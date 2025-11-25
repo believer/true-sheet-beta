@@ -48,7 +48,7 @@ function SheetInSheet() {
 		<>
 			<Button title="Sheet in sheet" onPress={() => sheet.current?.present()} />
 			<TrueSheet detents={[1]} ref={sheet}>
-				<Text>Other sheet</Text>
+				<Text>Outer sheet</Text>
 				<TrueSheet dimmed={false} detents={[0.4]} initialDetentIndex={0}>
 					<Text>Inner sheet</Text>
 				</TrueSheet>
